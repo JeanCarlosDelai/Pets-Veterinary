@@ -1,6 +1,6 @@
 import TutorService from "../services/tutor.service";
 import { Request, Response } from 'express';
-
+import 'express-async-errors';
 class TutorController {
     async getAllTutors(req: Request, res: Response) {
         const tutors = await TutorService.getAllTutors();
