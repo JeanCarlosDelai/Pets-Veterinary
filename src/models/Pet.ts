@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 interface Pet extends Document {
-    id: number;
+    id: mongoose.Types.ObjectId;
     name: string;
     species: string;
     carry: string;
@@ -44,8 +44,8 @@ const PetSchema: Schema<Pet> = new Schema({
     tutor: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Tutor',
-        required: true,
-    },
+        required: true
+    }
 });
 
 export default mongoose.model<Pet>('Pet', PetSchema);

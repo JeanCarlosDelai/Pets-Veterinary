@@ -1,5 +1,6 @@
 import CustomAPIError from '../errors';
 import TutorRepository from '../repositories/tutor.repository';
+import AuthRepository from '../repositories/auth.repository';
 
 interface TutorData {
     name: string;
@@ -13,16 +14,17 @@ class TutorService {
     async getAllTutors() {
         const tutors = await TutorRepository.findAll();
 
-        const tutorShow = tutors.map(({ _id, name, phone, email, date_of_birth, zip_code }) => ({
+        const tutorShow = tutors.map(({ _id, name, phone, email, date_of_birth, zip_code, pets }) => ({
             id: _id,
             name,
             phone,
             email,
             date_of_birth,
             zip_code,
+            pets
         }));
 
-        return ({ tutorShow, count: tutors.length });
+        return (tutorShow);
     }
 
     async createTutor(tutorData: TutorData) {
@@ -73,7 +75,7 @@ class TutorService {
         if (!existingTutor) {
             throw new CustomAPIError.NotFoundError('Tutor not found');
         }
-        // Verifique se os campos têm o tipo correto
+
         const requiredFields: (keyof TutorData)[] = ['name', 'email', 'phone', 'date_of_birth', 'zip_code'];
         const errors: string[] = [];
 
@@ -107,12 +109,8 @@ class TutorService {
         return tutorShow;
     }
 
-
-
-
-
     private async checkDuplicateEmail(email: string) {
-        const existingTutor = await TutorRepository.findByEmail(email);
+        const existingTutor = await AuthRepository.findByEmail(email);
 
         if (existingTutor) {
             throw new CustomAPIError.BadRequestError('E-mail already registered');

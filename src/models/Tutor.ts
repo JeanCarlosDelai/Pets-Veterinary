@@ -1,7 +1,8 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
+const jwt = require('jsonwebtoken');
 interface Tutor extends Document {
-  id: number;
+  id: mongoose.Types.ObjectId;
   name: string;
   password: string;
   phone?: string;
@@ -62,6 +63,16 @@ TutorSchema.pre<Tutor>('save', async function (next) {
   this.password = await bcrypt.hash(this.password as string, salt);
   next();
 });
+
+TutorSchema.methods.createJWT = function () {
+  return jwt.sign(
+    { userId: this.id, name: this.name },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_LIFETIME,
+    }
+  );
+};
 
 TutorSchema.methods.comparePassword = async function (canditatePassword: string) {
   const isMatch = await bcrypt.compare(canditatePassword, this.password);

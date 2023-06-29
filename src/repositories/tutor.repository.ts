@@ -25,11 +25,6 @@ class TutorRepository {
     async deleteOne(tutorId: string) {
         await Tutor.findByIdAndDelete(tutorId);
     }
-
-    async findByEmail(email: string) {
-        const tutor = await Tutor.findOne({ email });
-        return tutor;
-    }
 }
 
 export default new TutorRepository();
