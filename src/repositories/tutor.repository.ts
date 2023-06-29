@@ -5,10 +5,17 @@ class TutorRepository {
         const tutors = await Tutor.find();
         return tutors;
     }
-
-    async create(tutorData: any) {
+    async findById(tutorId: string) {
+        const tutor = await Tutor.findById(tutorId);
+        return tutor;
+    }
+    async create(tutorData: Object) {
         const newTutor = await Tutor.create(tutorData);
         return newTutor;
+    }
+
+    async deleteOne(tutorId: string) {
+        await Tutor.findByIdAndDelete(tutorId);
     }
 
     async findByEmail(email: string) {

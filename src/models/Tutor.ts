@@ -61,7 +61,7 @@ TutorSchema.pre<Tutor>('save', async function () {
   this.password = await bcrypt.hash(this.password as string, salt);
 });
 
-TutorSchema.methods.comparePassword = async function (canditatePassword: any) {
+TutorSchema.methods.comparePassword = async function (canditatePassword: string) {
   const isMatch = await bcrypt.compare(canditatePassword, this.password);
   return isMatch;
 };

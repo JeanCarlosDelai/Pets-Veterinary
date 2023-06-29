@@ -1,6 +1,14 @@
 import CustomAPIError from '../errors';
 import TutorRepository from '../repositories/tutor.repository';
 
+interface TutorData {
+    name: string;
+    password: string;
+    email: string;
+    phone: string;
+    date_of_birth: string;
+    zip_code: string;
+}
 class TutorService {
     async getAllTutors() {
         const tutors = await TutorRepository.findAll();
@@ -17,12 +25,12 @@ class TutorService {
         return ({ tutorShow, count: tutors.length });
     }
 
-    async createTutor(tutorData: any) {
-        const requiredFields = ['name', 'password', 'email', 'phone', 'date_of_birth', 'zip_code'];
-        const errors: any = [];
+    async createTutor(tutorData: TutorData) {
+        const requiredFields: (keyof TutorData)[] = ['name', 'password', 'email', 'phone', 'date_of_birth', 'zip_code'];
+        const errors: string[] = [];
 
         requiredFields.forEach(field => {
-            if (!tutorData[field]) {
+            if (!tutorData[field] || tutorData[field].trim() === '') {
                 errors.push(`Required field '${field}' is missing`);
             }
         });
@@ -53,6 +61,16 @@ class TutorService {
         if (existingTutor) {
             throw new CustomAPIError.BadRequestError('E-mail already registered');
         }
+    }
+
+    async deleteTutor(tutorId: string) {
+        const existingTutor = await TutorRepository.findById(tutorId);
+
+        if (!existingTutor) {
+            throw new CustomAPIError.NotFoundError('Tutor not found');
+        }
+
+        await TutorRepository.deleteOne(tutorId);
     }
 }
 
