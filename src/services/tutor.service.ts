@@ -9,6 +9,10 @@ class TutorService {
             throw new Error('Failed to fetch tutors');
         }
     }
+    async createTutor(tutorData: any) {
+        const newTutor = await TutorRepository.create(tutorData);
+        return newTutor;
+    }
 }
 
 export default new TutorService();
