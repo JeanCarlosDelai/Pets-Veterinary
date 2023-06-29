@@ -26,20 +26,28 @@ class TutorService {
     }
 
     async createTutor(tutorData: TutorData) {
+
+        await this.checkDuplicateEmail(tutorData.email);
+
         const requiredFields: (keyof TutorData)[] = ['name', 'password', 'email', 'phone', 'date_of_birth', 'zip_code'];
         const errors: string[] = [];
 
         requiredFields.forEach(field => {
-            if (!tutorData[field] || tutorData[field].trim() === '') {
-                errors.push(`Required field '${field}' is missing`);
+            const fieldValue = tutorData[field];
+            const fieldType = typeof fieldValue;
+
+            if (!fieldValue || fieldValue.trim() === '') {
+                errors.push(`Required field '${field}' is invalid`);
             }
+            if (fieldValue !== undefined && fieldType !== 'string') {
+                errors.push(`Invalid field type for '${field}'. Expected string.`);
+            }
+
         });
 
         if (errors.length > 0) {
             throw new CustomAPIError.BadRequestError(errors.join(', '));
         }
-
-        await this.checkDuplicateEmail(tutorData.email);
 
         const newTutor = await TutorRepository.create(tutorData);
 
@@ -54,6 +62,54 @@ class TutorService {
 
         return tutorShow;
     }
+
+
+
+    async updateTutor(tutorData: TutorData, tutorId: string) {
+        const existingTutor = await TutorRepository.findById(tutorId);
+
+        await this.checkDuplicateEmail(tutorData.email);
+
+        if (!existingTutor) {
+            throw new CustomAPIError.NotFoundError('Tutor not found');
+        }
+        // Verifique se os campos têm o tipo correto
+        const requiredFields: (keyof TutorData)[] = ['name', 'email', 'phone', 'date_of_birth', 'zip_code'];
+        const errors: string[] = [];
+
+        requiredFields.forEach(field => {
+            const fieldValue = tutorData[field];
+            const fieldType = typeof fieldValue;
+
+            if (fieldValue !== undefined && fieldType !== 'string') {
+                errors.push(`Invalid field type for '${field}'. Expected string.`);
+            }
+
+            if (fieldType === 'string' && fieldValue.trim() === '') {
+                errors.push(`Field '${field}' cannot be an empty string.`);
+            }
+        });
+
+        if (errors.length > 0) {
+            throw new CustomAPIError.BadRequestError(errors.join(', '));
+        }
+
+        const updateTutor: any = await TutorRepository.update(tutorData, tutorId);
+
+        const tutorShow = {
+            name: updateTutor.name,
+            phone: updateTutor.phone,
+            email: updateTutor.email,
+            date_of_birth: updateTutor.date_of_birth,
+            zip_code: updateTutor.zip_code
+        };
+
+        return tutorShow;
+    }
+
+
+
+
 
     private async checkDuplicateEmail(email: string) {
         const existingTutor = await TutorRepository.findByEmail(email);

@@ -9,6 +9,14 @@ class TutorRepository {
         const tutor = await Tutor.findById(tutorId);
         return tutor;
     }
+    async update(tutorData: Object, tutorId: string) {
+        const updatedTutor = await Tutor.findByIdAndUpdate(tutorId, tutorData, {
+            new: true,
+            runValidators: true
+        });
+        return updatedTutor;
+    }
+
     async create(tutorData: Object) {
         const newTutor = await Tutor.create(tutorData);
         return newTutor;

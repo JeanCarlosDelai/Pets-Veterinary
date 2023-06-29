@@ -9,6 +9,7 @@ interface Tutor extends Document {
   date_of_birth?: string;
   zip_code?: string;
   pets: mongoose.Types.ObjectId[];
+  comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 const TutorSchema: Schema<Tutor> = new Schema({
@@ -55,10 +56,11 @@ const TutorSchema: Schema<Tutor> = new Schema({
   },
 });
 
-TutorSchema.pre<Tutor>('save', async function () {
+TutorSchema.pre<Tutor>('save', async function (next) {
   if (!this.isModified('password')) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password as string, salt);
+  next();
 });
 
 TutorSchema.methods.comparePassword = async function (canditatePassword: string) {
