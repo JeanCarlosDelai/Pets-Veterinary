@@ -16,6 +16,13 @@ class PetRepository {
     async deleteOne(tutorId: string, petId: string) {
         await Pet.findOneAndDelete({ _id: petId, tutor: tutorId });
     }
+    async update(petData: Object, petId: string) {
+        const updatedPet = await Pet.findByIdAndUpdate(petId, petData, {
+            new: true,
+            runValidators: true
+        });
+        return updatedPet;
+    }
 }
 
 export default new PetRepository();

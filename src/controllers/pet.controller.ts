@@ -14,7 +14,14 @@ class PetController {
         const tutorId = req.params.tutorId;
         const petId = req.params.petId;
         await PetService.deletePet(tutorId, petId);
-        res.sendStatus(StatusCodes.OK);
+        res.sendStatus(StatusCodes.NO_CONTENT);
+    }
+    async updatePet(req: Request, res: Response) {
+        const tutorId = req.params.tutorId;
+        const petId = req.params.petId;
+        const petData = req.body;
+        const updatePet = await PetService.updatePet(petData, petId, tutorId);
+        res.status(StatusCodes.CREATED).json(updatePet);
     }
 }
 

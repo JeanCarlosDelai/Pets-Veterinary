@@ -28,7 +28,7 @@ class PetService {
         requiredFields.forEach(field => {
             const fieldValue = petData[field];
 
-            if (!fieldValue) {
+            if (fieldValue === '') {
                 errors.push(`Required field '${field}' is invalid`);
             }
 
@@ -78,6 +78,45 @@ class PetService {
         }
 
         await PetRepository.deleteOne(tutorId, petId);
+    }
+
+    async updatePet(petData: PetData, petId: string, tutorId: string) {
+        const existingTutor = await TutorRepository.findById(tutorId);
+
+        if (!existingTutor) {
+            throw new CustomAPIError.NotFoundError('Tutor not found');
+        }
+
+        const existingPet = await PetRepository.findById(tutorId, petId);
+
+        if (!existingPet) {
+            throw new CustomAPIError.BadRequestError('Pet not found');
+        }
+
+        const requiredFields: (keyof PetData)[] = ['name', 'species', 'carry', 'weight', 'date_of_birth'];
+        const errors: string[] = [];
+
+        requiredFields.forEach(field => {
+            const fieldValue = petData[field];
+
+            if (!fieldValue) {
+                errors.push(`Required field '${field}' is invalid`);
+            }
+
+        });
+
+        if (errors.length > 0) {
+            throw new CustomAPIError.BadRequestError(errors.join(', '));
+        }
+
+        const updatePet: any = await PetRepository.update(petData, petId);
+
+        const tutorShow = {
+            name: updatePet.name,
+            date_of_birth: updatePet.date_of_birth,
+        };
+
+        return tutorShow;
     }
 }
 
