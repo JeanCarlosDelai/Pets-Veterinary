@@ -2,7 +2,7 @@ import Tutor from '../models/Tutor';
 
 class TutorRepository {
     async findAll() {
-        const tutors = await Tutor.find();
+        const tutors = await Tutor.find().populate({ path: 'pets' });
         return tutors;
     }
     async findById(tutorId: string) {
@@ -24,6 +24,9 @@ class TutorRepository {
 
     async deleteOne(tutorId: string) {
         await Tutor.findByIdAndDelete(tutorId);
+    }
+    async save(tutor: any) {
+        return await tutor.save();
     }
 }
 

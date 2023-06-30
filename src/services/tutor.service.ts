@@ -1,6 +1,7 @@
 import CustomAPIError from '../errors';
 import TutorRepository from '../repositories/tutor.repository';
 import AuthRepository from '../repositories/auth.repository';
+import { ObjectId } from 'mongoose';
 
 interface TutorData {
     name: string;
@@ -15,13 +16,19 @@ class TutorService {
         const tutors = await TutorRepository.findAll();
 
         const tutorShow = tutors.map(({ _id, name, phone, email, date_of_birth, zip_code, pets }) => ({
-            id: _id,
+            _id,
             name,
             phone,
             email,
             date_of_birth,
             zip_code,
-            pets
+            pets: pets.map((pet: any) => ({
+                name: pet.name,
+                species: pet.species,
+                carry: pet.carry,
+                weight: pet.weight,
+                date_of_birth: pet.date_of_birth
+            }))
         }));
 
         return (tutorShow);
@@ -64,8 +71,6 @@ class TutorService {
 
         return tutorShow;
     }
-
-
 
     async updateTutor(tutorData: TutorData, tutorId: string) {
         const existingTutor = await TutorRepository.findById(tutorId);

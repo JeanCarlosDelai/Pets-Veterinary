@@ -44,7 +44,6 @@ const PetSchema: Schema<Pet> = new Schema({
     tutor: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Tutor',
-        required: true
     }
 });
 
