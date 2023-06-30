@@ -1,5 +1,5 @@
 import Tutor from '../models/Tutor';
-
+import { TutorInterface } from '../models/Tutor';
 class TutorRepository {
     async findAll() {
         const tutors = await Tutor.find().populate({ path: 'pets' });
@@ -9,19 +9,17 @@ class TutorRepository {
         const tutor = await Tutor.findById(tutorId);
         return tutor;
     }
-    async update(tutorData: Object, tutorId: string) {
+    async update(tutorData: TutorInterface, tutorId: string) {
         const updatedTutor = await Tutor.findByIdAndUpdate(tutorId, tutorData, {
             new: true,
             runValidators: true
         });
         return updatedTutor;
     }
-
-    async create(tutorData: Object) {
+    async create(tutorData: TutorInterface) {
         const newTutor = await Tutor.create(tutorData);
         return newTutor;
     }
-
     async deleteOne(tutorId: string) {
         await Tutor.findByIdAndDelete(tutorId);
     }

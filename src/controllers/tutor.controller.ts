@@ -15,7 +15,7 @@ class TutorController {
     async deleteTutor(req: Request, res: Response) {
         const tutorId = req.params.tutorId;
         await TutorService.deleteTutor(tutorId);
-        res.sendStatus(StatusCodes.OK);
+        res.sendStatus(StatusCodes.NO_CONTENT);
     }
     async updateTutor(req: Request, res: Response) {
         const tutorId = req.params.tutorId;

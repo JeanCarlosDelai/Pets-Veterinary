@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 const jwt = require('jsonwebtoken');
-interface Tutor extends Document {
+export interface TutorInterface extends Document {
   id: mongoose.Types.ObjectId;
   name: string;
   password: string;
@@ -13,7 +13,7 @@ interface Tutor extends Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const TutorSchema: Schema<Tutor> = new Schema({
+const TutorSchema: Schema<TutorInterface> = new Schema({
   name: {
     type: String,
     required: [true, 'Please provide name'],
@@ -63,7 +63,7 @@ const TutorSchema: Schema<Tutor> = new Schema({
 
 });
 
-TutorSchema.pre<Tutor>('save', async function (next) {
+TutorSchema.pre<TutorInterface>('save', async function (next) {
   if (!this.isModified('password')) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password as string, salt);
@@ -80,9 +80,8 @@ TutorSchema.methods.createJWT = function () {
   );
 };
 
-TutorSchema.methods.comparePassword = async function (canditatePassword: string) {
-  const isMatch = await bcrypt.compare(canditatePassword, this.password);
+TutorSchema.methods.comparePassword = async function (candidatePassword: string) {
+  const isMatch = await bcrypt.compare(candidatePassword, this.password);
   return isMatch;
 };
-
-export default mongoose.model<Tutor>('Tutor', TutorSchema);
+export default mongoose.model<TutorInterface>('Tutor', TutorSchema);

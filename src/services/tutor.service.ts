@@ -1,16 +1,9 @@
 import CustomAPIError from '../errors';
 import TutorRepository from '../repositories/tutor.repository';
 import AuthRepository from '../repositories/auth.repository';
-import { ObjectId } from 'mongoose';
-
-interface TutorData {
-    name: string;
-    password: string;
-    email: string;
-    phone: string;
-    date_of_birth: string;
-    zip_code: string;
-}
+import { validateTutorDataCreate, validateTutorDataUpdate } from '../utils/tutorRequiredFields';
+import PetRepository from '../repositories/pet.repository';
+import { TutorInterface } from '../models/Tutor';
 class TutorService {
     async getAllTutors() {
         const tutors = await TutorRepository.findAll();
@@ -35,29 +28,11 @@ class TutorService {
         return (tutorShow);
     }
 
-    async createTutor(tutorData: TutorData) {
+    async createTutor(tutorData: TutorInterface) {
 
         await this.checkDuplicateEmail(tutorData.email);
 
-        const requiredFields: (keyof TutorData)[] = ['name', 'password', 'email', 'phone', 'date_of_birth', 'zip_code'];
-        const errors: string[] = [];
-
-        requiredFields.forEach(field => {
-            const fieldValue = tutorData[field];
-            const fieldType = typeof fieldValue;
-
-            if (!fieldValue || fieldValue.trim() === '') {
-                errors.push(`Required field '${field}' is invalid`);
-            }
-            if (fieldValue !== undefined && fieldType !== 'string') {
-                errors.push(`Invalid field type for '${field}'. Expected string.`);
-            }
-
-        });
-
-        if (errors.length > 0) {
-            throw new CustomAPIError.BadRequestError(errors.join(', '));
-        }
+        validateTutorDataCreate(tutorData)
 
         const newTutor = await TutorRepository.create(tutorData);
 
@@ -73,7 +48,7 @@ class TutorService {
         return tutorShow;
     }
 
-    async updateTutor(tutorData: TutorData, tutorId: string) {
+    async updateTutor(tutorData: TutorInterface, tutorId: string) {
         const existingTutor = await TutorRepository.findById(tutorId);
 
         await this.checkDuplicateEmail(tutorData.email);
@@ -82,25 +57,7 @@ class TutorService {
             throw new CustomAPIError.NotFoundError('Tutor not found');
         }
 
-        const requiredFields: (keyof TutorData)[] = ['name', 'email', 'phone', 'date_of_birth', 'zip_code'];
-        const errors: string[] = [];
-
-        requiredFields.forEach(field => {
-            const fieldValue = tutorData[field];
-            const fieldType = typeof fieldValue;
-
-            if (fieldValue !== undefined && fieldType !== 'string') {
-                errors.push(`Invalid field type for '${field}'. Expected string.`);
-            }
-
-            if (fieldType === 'string' && fieldValue.trim() === '') {
-                errors.push(`Field '${field}' cannot be an empty string.`);
-            }
-        });
-
-        if (errors.length > 0) {
-            throw new CustomAPIError.BadRequestError(errors.join(', '));
-        }
+        validateTutorDataUpdate(tutorData)
 
         const updateTutor: any = await TutorRepository.update(tutorData, tutorId);
 
@@ -128,6 +85,11 @@ class TutorService {
 
         if (!existingTutor) {
             throw new CustomAPIError.NotFoundError('Tutor not found');
+        }
+        const associatedPets = await PetRepository.findByTutorId(tutorId);
+
+        if (associatedPets.length > 0) {
+            throw new CustomAPIError.BadRequestError('Tutor has associated pets and cannot be deleted');
         }
 
         await TutorRepository.deleteOne(tutorId);

@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-interface Pet extends Document {
+export interface PetInterface extends Document {
     id: mongoose.Types.ObjectId;
     name: string;
     species: string;
@@ -10,7 +10,7 @@ interface Pet extends Document {
     tutor: mongoose.Types.ObjectId;
 }
 
-const PetSchema: Schema<Pet> = new Schema({
+const PetSchema: Schema<PetInterface> = new Schema({
     name: {
         type: String,
         required: [true, 'Please provide name'],
@@ -47,4 +47,4 @@ const PetSchema: Schema<Pet> = new Schema({
     }
 });
 
-export default mongoose.model<Pet>('Pet', PetSchema);
+export default mongoose.model<PetInterface>('Pet', PetSchema);

@@ -2,18 +2,11 @@ import CustomAPIError from '../errors';
 import PetRepository from '../repositories/pet.repository';
 import TutorRepository from '../repositories/tutor.repository';
 import Pet from '../models/Pet';
-interface PetData {
-    name: string;
-    species: string;
-    carry: string;
-    weight: number;
-    date_of_birth: string;
-    tutor: string;
-}
-
+import { PetInterface } from '../models/Pet';
+import { validatePetDataCreate, validatePetDataUpdate } from '../utils/petRequiredFields';
 class PetService {
 
-    async createPet(tutorId: string, petData: PetData) {
+    async createPet(tutorId: string, petData: PetInterface) {
         const tutor = await TutorRepository.findById(tutorId);
 
         if (!tutor) {
@@ -22,21 +15,7 @@ class PetService {
 
         await this.checkDuplicateName(tutorId, petData.name);
 
-        const requiredFields: (keyof PetData)[] = ['name', 'species', 'carry', 'weight', 'date_of_birth'];
-        const errors: string[] = [];
-
-        requiredFields.forEach(field => {
-            const fieldValue = petData[field];
-
-            if (fieldValue === '') {
-                errors.push(`Required field '${field}' is invalid`);
-            }
-
-        });
-
-        if (errors.length > 0) {
-            throw new CustomAPIError.BadRequestError(errors.join(', '));
-        }
+        validatePetDataCreate(petData)
 
         const pet = new Pet({ ...petData, tutor: tutorId });
 
@@ -80,7 +59,7 @@ class PetService {
         await PetRepository.deleteOne(tutorId, petId);
     }
 
-    async updatePet(petData: PetData, petId: string, tutorId: string) {
+    async updatePet(petData: PetInterface, petId: string, tutorId: string) {
         const existingTutor = await TutorRepository.findById(tutorId);
 
         if (!existingTutor) {
@@ -93,21 +72,7 @@ class PetService {
             throw new CustomAPIError.BadRequestError('Pet not found');
         }
 
-        const requiredFields: (keyof PetData)[] = ['name', 'species', 'carry', 'weight', 'date_of_birth'];
-        const errors: string[] = [];
-
-        requiredFields.forEach(field => {
-            const fieldValue = petData[field];
-
-            if (!fieldValue) {
-                errors.push(`Required field '${field}' is invalid`);
-            }
-
-        });
-
-        if (errors.length > 0) {
-            throw new CustomAPIError.BadRequestError(errors.join(', '));
-        }
+        validatePetDataUpdate(petData)
 
         const updatePet: any = await PetRepository.update(petData, petId);
 

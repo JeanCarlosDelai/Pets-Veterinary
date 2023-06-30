@@ -1,6 +1,5 @@
 import CustomAPIError from '../errors';
 import AuthRepository from '../repositories/auth.repository';
-import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 const secretKey: any = process.env.JWT_SECRET;
@@ -13,7 +12,7 @@ class AuthService {
             throw new CustomAPIError.UnauthenticatedError('User not found');
         }
 
-        const isPasswordValid = await bcrypt.compare(password, tutor.password);
+        const isPasswordValid: any = await AuthRepository.comparePassword(tutor, password);
         if (!isPasswordValid) {
             throw new CustomAPIError.UnauthenticatedError('Invalid password');
         }

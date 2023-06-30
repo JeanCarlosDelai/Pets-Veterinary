@@ -1,8 +1,8 @@
 import Pet from "../models/Pet";
-
+import { PetInterface } from '../models/Pet';
 class PetRepository {
 
-    async create(pet: any) {
+    async create(pet: PetInterface) {
         return await pet.save();
     }
     async findByName(tutorId: string, name: string) {
@@ -16,7 +16,11 @@ class PetRepository {
     async deleteOne(tutorId: string, petId: string) {
         await Pet.findOneAndDelete({ _id: petId, tutor: tutorId });
     }
-    async update(petData: Object, petId: string) {
+    async findByTutorId(tutorId: string) {
+        const pets = await Pet.find({ tutor: tutorId });
+        return pets;
+    }
+    async update(petData: PetInterface, petId: string) {
         const updatedPet = await Pet.findByIdAndUpdate(petId, petData, {
             new: true,
             runValidators: true
