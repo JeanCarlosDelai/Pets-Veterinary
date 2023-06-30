@@ -63,6 +63,22 @@ class PetService {
             throw new CustomAPIError.BadRequestError('Pet already registered');
         }
     }
+
+    async deletePet(tutorId: string, petId: string) {
+        const existingTutor = await TutorRepository.findById(tutorId);
+
+        if (!existingTutor) {
+            throw new CustomAPIError.NotFoundError('Tutor not found');
+        }
+
+        const existingPet = await PetRepository.findById(tutorId, petId);
+
+        if (!existingPet) {
+            throw new CustomAPIError.BadRequestError('Pet not found');
+        }
+
+        await PetRepository.deleteOne(tutorId, petId);
+    }
 }
 
 

@@ -23,6 +23,7 @@ class TutorService {
             date_of_birth,
             zip_code,
             pets: pets.map((pet: any) => ({
+                id: pet.id,
                 name: pet.name,
                 species: pet.species,
                 carry: pet.carry,
