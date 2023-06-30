@@ -1,89 +1,94 @@
-import CustomAPIError from '../errors';
-import PetRepository from '../repositories/pet.repository';
-import TutorRepository from '../repositories/tutor.repository';
-import Pet from '../models/Pet';
-import { PetInterface } from '../models/Pet';
-import { validatePetDataCreate, validatePetDataUpdate } from '../utils/petRequiredFields';
+import CustomAPIError from '../errors'
+import PetRepository from '../repositories/pet.repository'
+import TutorRepository from '../repositories/tutor.repository'
+import Pet from '../models/Pet'
+import { PetInterface } from '../models/Pet'
+import {
+  validatePetDataCreate,
+  validatePetDataUpdate
+} from '../utils/petRequiredFields'
 class PetService {
+  async createPet(tutorId: string, petData: PetInterface) {
+    const tutor = await TutorRepository.findById(tutorId)
 
-    async createPet(tutorId: string, petData: PetInterface) {
-        const tutor = await TutorRepository.findById(tutorId);
-
-        if (!tutor) {
-            throw new CustomAPIError.BadRequestError('Tutor not found');
-        }
-
-        await this.checkDuplicateName(tutorId, petData.name);
-
-        validatePetDataCreate(petData)
-
-        const pet = new Pet({ ...petData, tutor: tutorId });
-
-        const createdPet = await PetRepository.create(pet);
-        tutor.pets.push(createdPet._id);
-        await TutorRepository.save(tutor);
-
-        const petShow = {
-            name: createdPet.name,
-            species: createdPet.species,
-            carry: createdPet.carry,
-            weight: createdPet.weight,
-            date_of_birth: createdPet.date_of_birth,
-        };
-
-
-        return petShow;
+    if (!tutor) {
+      throw new CustomAPIError.BadRequestError('Tutor not found')
     }
 
-    private async checkDuplicateName(tutorId: string, name: string) {
-        const existingPet = await PetRepository.findByName(tutorId, name);
+    await this.checkDuplicateName(tutorId, petData.name)
 
-        if (existingPet) {
-            throw new CustomAPIError.BadRequestError('Pet already registered');
-        }
+    validatePetDataCreate(petData)
+
+    const pet = new Pet({ ...petData, tutor: tutorId })
+
+    const createdPet = await PetRepository.create(pet)
+    tutor.pets.push(createdPet._id)
+    await TutorRepository.save(tutor)
+
+    const petShow = {
+      name: createdPet.name,
+      species: createdPet.species,
+      carry: createdPet.carry,
+      weight: createdPet.weight,
+      date_of_birth: createdPet.date_of_birth
     }
 
-    async deletePet(tutorId: string, petId: string) {
-        const existingTutor = await TutorRepository.findById(tutorId);
+    return petShow
+  }
 
-        if (!existingTutor) {
-            throw new CustomAPIError.NotFoundError('Tutor not found');
-        }
+  private async checkDuplicateName(tutorId: string, name: string) {
+    const existingPet = await PetRepository.findByName(tutorId, name)
 
-        const existingPet = await PetRepository.findById(tutorId, petId);
+    if (existingPet) {
+      throw new CustomAPIError.BadRequestError('Pet already registered')
+    }
+  }
 
-        if (!existingPet) {
-            throw new CustomAPIError.BadRequestError('Pet not found');
-        }
+  async deletePet(tutorId: string, petId: string) {
+    const existingTutor = await TutorRepository.findById(tutorId)
 
-        await PetRepository.deleteOne(tutorId, petId);
+    if (!existingTutor) {
+      throw new CustomAPIError.NotFoundError('Tutor not found')
     }
 
-    async updatePet(petData: PetInterface, petId: string, tutorId: string) {
-        const existingTutor = await TutorRepository.findById(tutorId);
+    const existingPet = await PetRepository.findById(tutorId, petId)
 
-        if (!existingTutor) {
-            throw new CustomAPIError.NotFoundError('Tutor not found');
-        }
-
-        const existingPet = await PetRepository.findById(tutorId, petId);
-
-        if (!existingPet) {
-            throw new CustomAPIError.BadRequestError('Pet not found');
-        }
-
-        validatePetDataUpdate(petData)
-
-        const updatePet: any = await PetRepository.update(petData, petId);
-
-        const tutorShow = {
-            name: updatePet.name,
-            date_of_birth: updatePet.date_of_birth,
-        };
-
-        return tutorShow;
+    if (!existingPet) {
+      throw new CustomAPIError.BadRequestError('Pet not found')
     }
+
+    await PetRepository.deleteOne(tutorId, petId)
+  }
+
+  async updatePet(petData: PetInterface, petId: string, tutorId: string) {
+    const existingTutor = await TutorRepository.findById(tutorId)
+
+    if (!existingTutor) {
+      throw new CustomAPIError.NotFoundError('Tutor not found')
+    }
+
+    const existingPet = await PetRepository.findById(tutorId, petId)
+
+    if (!existingPet) {
+      throw new CustomAPIError.BadRequestError('Pet not found')
+    }
+
+    validatePetDataUpdate(petData)
+
+    const updatePet = await PetRepository.update(petData, petId)
+
+    if (updatePet) {
+      const tutorShow = {
+        name: updatePet.name,
+        species: updatePet.species,
+        carry: updatePet.carry,
+        weight: updatePet.weight,
+        date_of_birth: updatePet.date_of_birth
+      }
+      return tutorShow
+    }
+    throw new CustomAPIError.BadRequestError('Pet not updated')
+  }
 }
 
-
-export default new PetService();
+export default new PetService()

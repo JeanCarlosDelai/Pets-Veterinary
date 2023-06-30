@@ -1,22 +1,25 @@
-
 import { StatusCodes } from 'http-status-codes'
 import { Request, Response, NextFunction } from 'express'
 
 interface CustomError {
-  statusCode?: number;
-  name?: string;
-  message?: string;
-  errors?: { message: string }[];
-  code?: number;
-  keyValue?: any;
-  value?: any;
+  statusCode?: number
+  name?: string
+  message?: string
+  errors?: { message: string }[]
+  code?: number
+  keyValue?: string
+  value?: number
 }
 
-const errorHandlerMiddleware = (err: CustomError, req: Request, res: Response, next: NextFunction) => {
-
-  let customError = {
+const errorHandlerMiddleware = (
+  err: CustomError,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const customError = {
     statusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
-    msg: err.message || 'Something is wrong try again',
+    msg: err.message || 'Something is wrong try again'
   }
 
   if (err.name === 'ValidationError') {
@@ -26,8 +29,8 @@ const errorHandlerMiddleware = (err: CustomError, req: Request, res: Response, n
     customError.statusCode = 400
   }
   if (err.code && err.code === 11000) {
-    customError.msg = `Duplicate values ​​for ${Object.keys(
-      err.keyValue
+    customError.msg = `Duplicate values for ${Object.keys(
+      err.keyValue || ''
     )} field, please choose another value`
     customError.statusCode = 400
   }
@@ -37,6 +40,6 @@ const errorHandlerMiddleware = (err: CustomError, req: Request, res: Response, n
   }
 
   return res.status(customError.statusCode).json({ msg: customError.msg })
+  next()
 }
-
 export default errorHandlerMiddleware

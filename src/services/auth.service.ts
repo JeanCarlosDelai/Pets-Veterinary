@@ -1,26 +1,31 @@
-import CustomAPIError from '../errors';
-import AuthRepository from '../repositories/auth.repository';
-import jwt from 'jsonwebtoken';
-import 'dotenv/config';
-const secretKey: any = process.env.JWT_SECRET;
+import CustomAPIError from '../errors'
+import AuthRepository from '../repositories/auth.repository'
+import jwt from 'jsonwebtoken'
+import 'dotenv/config'
 
 class AuthService {
-    async login(email: string, password: string) {
+  async login(email: string, password: string) {
+    const tutor = await AuthRepository.findByEmail(email)
+    if (!tutor) {
+      throw new CustomAPIError.UnauthenticatedError('User not found')
+    }
 
-        const tutor = await AuthRepository.findByEmail(email);
-        if (!tutor) {
-            throw new CustomAPIError.UnauthenticatedError('User not found');
-        }
-
-        const isPasswordValid: any = await AuthRepository.comparePassword(tutor, password);
-        if (!isPasswordValid) {
-            throw new CustomAPIError.UnauthenticatedError('Invalid password');
-        }
-
-        const token = jwt.sign({ tutorId: tutor.id }, secretKey);
-        return token;
-    };
-
+    const isPasswordValid: boolean = await AuthRepository.comparePassword(
+      tutor,
+      password
+    )
+    if (!isPasswordValid) {
+      throw new CustomAPIError.UnauthenticatedError('Invalid password')
+    }
+    if (process.env.JWT_SECRET) {
+      const token: string = jwt.sign(
+        { tutorId: tutor.id },
+        process.env.JWT_SECRET
+      )
+      return token
+    }
+    throw new CustomAPIError.NotFoundError('secretKey not found')
+  }
 }
 
-export default new AuthService();
+export default new AuthService()
