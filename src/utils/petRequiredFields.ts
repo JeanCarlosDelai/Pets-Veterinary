@@ -43,16 +43,20 @@ export function validatePetDataUpdate(petData: PetInterface): void {
   requiredFields.forEach((field) => {
     const fieldValue = petData[field]
 
-    if (typeof fieldValue !== 'string' && field !== 'weight') {
-      errors.push(`Invalid field type for '${field}'. Expected string.`)
-    } else if (field === 'weight' && typeof fieldValue !== 'number') {
-      errors.push(`Invalid field type for '${field}'. Expected number.`)
-    } else if (typeof fieldValue === 'string' && fieldValue.trim() === '') {
-      errors.push(`Required field '${field}' is invalid`)
+    if (typeof fieldValue === 'undefined') {
+      // O campo é undefined, não é necessário realizar validações
+    } else {
+      if (typeof fieldValue !== 'string' && field !== 'weight') {
+        errors.push(`Invalid field type for '${field}'. Expected string.`)
+      } else if (field === 'weight' && typeof fieldValue !== 'number') {
+        errors.push(`Invalid field type for '${field}'. Expected number.`)
+      } else if (typeof fieldValue === 'string' && fieldValue.trim() === '') {
+        errors.push(`Required field '${field}' is invalid.`)
+      }
+    }
+
+    if (errors.length > 0) {
+      throw new CustomAPIError.BadRequestError(errors.join(', '))
     }
   })
-
-  if (errors.length > 0) {
-    throw new CustomAPIError.BadRequestError(errors.join(', '))
-  }
 }
