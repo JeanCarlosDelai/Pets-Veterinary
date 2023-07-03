@@ -3,6 +3,7 @@ import tutorRouter from './routes/tutor'
 import authRouter from './routes/auth'
 import petRouter from './routes/pet'
 import errorHandlerMiddleware from './middleware/error-handler'
+import notFound from './middleware/not-found'
 import cors from 'cors'
 import swaggerUI from 'swagger-ui-express'
 import YAML from 'yamljs'
@@ -28,5 +29,6 @@ app.use('/pet', petRouter)
 
 //Midleware
 app.use(errorHandlerMiddleware)
+app.use(notFound)
 
 export default app
