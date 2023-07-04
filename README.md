@@ -7,10 +7,13 @@ So, your new mission is to adapt the service in order to allow some new features
 
 ## Functionalities
 
+Auth
+
+- POST/auth -> Authenticate the given user.
+
 Tutors
 
 - GET/tutors -> Retrieves all tutors. Authentication required.
-- POST/auth -> Authenticate the given user.
 - POST/tutor -> Create a new tutor.
 - PUT/tutor/:id -> Updates a tutor. Authentication required.
 - DELETE/tutor/:id -> Deletes a tutor. Authentication required.
@@ -44,9 +47,9 @@ npm install
 Create a file called .env in the default directory and put the preferences
 
 ```sh
-MONGO_URI=
-JWT_SECRET=
-JWT_LIFETIME=
+MONGO_URI= # MongoDB connection URI
+JWT_SECRET=  # Secret key for JWT authentication
+JWT_LIFETIME=  # JWT token lifetime (e.g., 1d, 2h, 30m)
 ```
 
 Start the server
